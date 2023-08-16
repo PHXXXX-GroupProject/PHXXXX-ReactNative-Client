@@ -1,13 +1,13 @@
 import * as React from "react";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { useQuery } from "@apollo/client";
 import { ScrollView } from "react-native";
 import { ActivityIndicator, Banner, List } from "react-native-paper";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import { Query } from "../lib/graphql";
 
 export function UsersScene() {
     const [visible, setVisible] = React.useState(true);
-    let { loading, error, data } = useQuery(Query.getUsers());
+    const { loading, error, data } = useQuery(Query.getUsers());
 
     if (loading) {
         return <ActivityIndicator animating={true} size={100} style={{marginTop: "50%"}}/>;

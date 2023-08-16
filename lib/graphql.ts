@@ -1,6 +1,16 @@
 import { gql } from "@apollo/client";
 
 export class Query {
+    static getMe() {
+        return gql`
+            query {
+                user: GetMe {
+                    username
+                }
+            }
+        `;
+    }
+
     static getUsers() {
         return gql`
             query {
@@ -11,13 +21,13 @@ export class Query {
             }
         `;
     }
+}
 
-    static getUser(username: string) {
+export class Mutation {
+    static signIn(username: string, password: string) {
         return gql`
-            query {
-                user: GetUser(username: "${username}") {
-                    username
-                }
+            mutation {
+                jwtToken: SignIn(username: "${username}", password: "${password}")
             }
         `;
     }

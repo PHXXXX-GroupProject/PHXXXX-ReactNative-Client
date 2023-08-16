@@ -1,16 +1,26 @@
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View, Image } from "react-native";
 import { Avatar, BottomNavigation, Button, TextInput } from "react-native-paper";
-import { LogInScreenStyles } from "../styles/screen";
+import { LogInScreenStyles } from "./style";
 import { UsersScene } from "./scene";
+import { AuthContext } from "../App";
+
+export function SplashScreen() {
+    return (
+        <Image
+            source={require("./img/splash.jpg")}
+            style={{
+                width: "100%",
+                height: "100%"
+            }}
+        />
+    );
+}
 
 export function LoginScreen() {
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
-
-    const handleLogin = () => {
-        console.log("Login button pressed!");
-    };
+    const authenticator = React.useContext(AuthContext);
 
     return (
         <View style={LogInScreenStyles.view}>
@@ -33,13 +43,13 @@ export function LoginScreen() {
             <Button 
                 style={LogInScreenStyles.button}
                 mode="outlined"
-                onPress={handleLogin}>
+                onPress={() => {authenticator.signIn(username, password)}}>
                 Sign In
             </Button>
             <Button 
                 style={LogInScreenStyles.button}
                 mode="outlined"
-                onPress={handleLogin}>
+                onPress={() => {authenticator.signIn(username, password)}}>
                 Sign Up
             </Button>
         </View>
