@@ -1,9 +1,12 @@
 import React from "react";
 import { ScrollView, Text, View, Image } from "react-native";
-import { Avatar, BottomNavigation, Button, TextInput } from "react-native-paper";
+import { Avatar, BottomNavigation, Button, TextInput, Appbar, Banner } from "react-native-paper";
 import { LogInScreenStyles } from "./style";
 import { UsersScene } from "./scene";
 import { AuthContext } from "../App";
+import { gql, useQuery } from "@apollo/client";
+import { Query } from "../lib/graphql";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export function SplashScreen() {
     return (
@@ -56,25 +59,58 @@ export function LoginScreen() {
     );
 };
 
-export function HomeScreen() {
-    const [index, setIndex] = React.useState(0);
-    const [routes] = React.useState([
-        { key: "exams", title: "Exams", focusedIcon: "book", unfocusedIcon: "book-outline"},
-        { key: "results", title: "Results", focusedIcon: "pencil" },
-        { key: "users", title: "Users", focusedIcon: "account", unfocusedIcon: "account-outline" },
-        { key: "roles", title: "Roles", focusedIcon: "account-star", unfocusedIcon: "account-tie" },
-    ]);
+const module2Icon = {
+    Exams: "book",
+    Results: "pencil",
+    Users: "account",
+    Roles: "account-tie"
+} as any;
 
-    return (
-        <BottomNavigation
-            navigationState={{ index, routes }}
-            onIndexChange={setIndex}
-            renderScene={BottomNavigation.SceneMap({
-                exams: () => <ScrollView><Text>Music</Text></ScrollView>,
-                results: () => <Text>Albums</Text>,
-                users: () => <UsersScene></UsersScene>,
-                roles: () => <Text>Music</Text>,
-            })}
-        />
-    );
+export function HomeScreen() {
+    const { loading, error, data, networkStatus } = useQuery(gql`${Query.getMe()}`);
+    const [index, setIndex] = React.useState(0);
+    const [routes] = React.useState([]);
+
+    if (loading) {
+        //WARNING: Loading state is ignored
+        return <Text>Loading</Text>;
+    } else if (error) {
+        return <Banner visible={true} icon={() => <Icon size={50} name="error" />}>
+            {error.message}
+        </Banner>
+    } else {
+        console.log(data.errors);
+        
+        const permissions = data.user.role.permissions as any[];
+        routes.length = 0;
+        for (const permission of permissions) {
+            if (module2Icon.hasOwnProperty(permission.module.url) && permission.value[1] === "1") {
+                routes.push({
+                    key: permission.module.url,
+                    title: permission.module.url,
+                    focusedIcon: module2Icon[permission.module.url]
+                } as never);
+            }
+        }
+
+        return (
+            <View style={{flex:1}}>
+                <Appbar.Header>
+                    <Appbar.Content title="Title" />
+                    <Appbar.Action icon="account" onPress={() => {}} />
+                    <Appbar.Action icon="logout" onPress={() => {}} />
+                </Appbar.Header>
+                <BottomNavigation
+                    navigationState={{ index, routes }}
+                    onIndexChange={setIndex}
+                    renderScene={BottomNavigation.SceneMap({
+                        Exams: () => <ScrollView><Text>Music</Text></ScrollView>,
+                        Results: () => <Text>Albums</Text>,
+                        Users: () => <UsersScene></UsersScene>,
+                        Roles: () => <Text>Music</Text>
+                    })}
+                />
+            </View>
+        );
+    }
 }

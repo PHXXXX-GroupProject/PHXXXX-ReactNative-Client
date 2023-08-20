@@ -1,18 +1,22 @@
-import { gql } from "@apollo/client";
-
 export class Query {
     static getMe() {
-        return gql`
+        return `
             query {
                 user: GetMe {
-                    username
+                    role {
+                        permissions {
+                            moduleId value module {
+                                url
+                            }
+                        }
+                    }
                 }
             }
         `;
     }
 
     static getUsers() {
-        return gql`
+        return `
             query {
                 users: GetUsers {
                     username
@@ -25,7 +29,7 @@ export class Query {
 
 export class Mutation {
     static signIn(username: string, password: string) {
-        return gql`
+        return `
             mutation {
                 jwtToken: SignIn(username: "${username}", password: "${password}")
             }

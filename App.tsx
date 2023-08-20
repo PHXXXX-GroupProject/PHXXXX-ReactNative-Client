@@ -7,9 +7,8 @@ import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink, concat, useQuery
 import { setContext } from "@apollo/client/link/context";
 
 import { LoginScreen, HomeScreen, SplashScreen } from "./ui/screen";
-import { AuthActions, LogInAction, LogInState } from "./lib/interface";
+import { LogInAction, LogInState } from "./lib/interface";
 import { LogInActionType } from "./lib/enum";
-import { Mutation } from "./lib/graphql";
 import { Authenticator } from "./lib/class";
 
 const httpLink = new HttpLink({ uri: "http://10.0.2.2:8080/" });
@@ -75,7 +74,7 @@ function App({ navigation }: any) {
     const authenticator = new Authenticator(dispatch);
     React.useEffect(() => {
         authenticator.restoreToken();
-    }, [])
+    }, []);
 
     return (
         <ApolloProvider client={client}>

@@ -2,6 +2,7 @@ import EncryptedStorage from "react-native-encrypted-storage";
 
 import { LogInActionType } from "./enum";
 import { LogInAction } from "./interface";
+import { Mutation } from "./graphql";
 
 export class Authenticator {
     private dispatch: (action: LogInAction) => void;
@@ -12,7 +13,7 @@ export class Authenticator {
 
     async restoreToken() {
         const jwtToken = await EncryptedStorage.getItem("JWT_TOKEN");
-
+        
         this.dispatch({
             type: LogInActionType.TOKEN_RESTORED,
             jwtToken: jwtToken,
@@ -33,9 +34,7 @@ export class Authenticator {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                query: `mutation {
-                    jwtToken: SignIn(username: "${username}", password: "${password}")
-                }`
+                query: Mutation.signIn(username, password)
             })
         }).then(res => res.text())
         .then(jwtToken => {
