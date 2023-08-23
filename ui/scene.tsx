@@ -1,23 +1,37 @@
-import * as React from "react";
+import React from "react";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { gql, useQuery } from "@apollo/client";
 import { ScrollView } from "react-native";
 import { ActivityIndicator, Banner, List } from "react-native-paper";
 import { Query } from "../lib/graphql";
+import { AuthCtx } from "../App";
+import { FetchState } from "../lib/interface";
+import { GraphQLError } from "graphql";
+import { Util } from "../lib/util";
 
 export function UsersScene() {
-    const { loading, error, data } = useQuery(gql`${Query.getUsers()}`);
+    const credentials = React.useContext(AuthCtx).data;
+    const [fetchState, setFetchState] = React.useState<FetchState<any, GraphQLError>>({
+        loading: true,
+        error: undefined,
+        data: undefined
+    });
+    React.useEffect(() => {
+        Util.fetch(credentials.jwtToken!, Query.getUsers(), setFetchState);
+    }, [fetchState.loading]);
 
-    if (loading) {
+    if (fetchState.loading) {
         return <ActivityIndicator animating={true} size={100} style={{marginTop: "50%"}}/>;
-    } else if (error) {
-        return <Banner visible={true} icon={() => <Icon size={50} name="error" />}>
-            {error.message}
+    } else if (fetchState.error) {
+        return <Banner
+            visible={true}
+            icon={() => <Icon size={50} name="error"/>}
+        >
+            {(fetchState.error.extensions.title as string).toUpperCase() + "\n" + fetchState.error.extensions.suggestion}
         </Banner>
     } else {
         return <ScrollView>
             {
-                data.users.map((item: any, i: number) => {
+                fetchState.data.users.map((item: any, i: number) => {
                     return <List.Item
                         key={i}
                         title={item.username}

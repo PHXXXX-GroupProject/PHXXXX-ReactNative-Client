@@ -1,3 +1,3 @@
-export enum LogInActionType {
-    TOKEN_RESTORED, SIGNED_IN, SIGNED_OUT, LOADING, ERRORED
-}
+export enum Key {
+    CREDENTIALS = "CREDENTIALS"
+} 
