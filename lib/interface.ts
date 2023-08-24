@@ -1,4 +1,4 @@
-import { GraphQLError } from "graphql";
+export type FetchState<D> = D | Error | null;
 
 export interface AuthActions {
     signIn: (username: string, password: string) => Promise<void>;
@@ -6,23 +6,15 @@ export interface AuthActions {
 }
 
 export interface AuthContext {
-    loading: boolean;
-    error: undefined | GraphQLError;
-    data: Credentials;
-    callback: React.Dispatch<FetchState<Credentials, GraphQLError>>
+    credentials: FetchState<Credentials>;
+    callback: React.Dispatch<FetchState<Credentials>>
 }
 
 export interface Credentials {
-    jwtToken: string | null;
+    jwtToken: string;
 }
 
-export interface FetchState<D = any, E = any> {
-    loading: boolean;
-    error: undefined | E;
-    data: undefined | D
-}
-
-export interface SceneData {
+export interface SceneRoute {
     key: string,
     title: string,
     focusedIcon: string

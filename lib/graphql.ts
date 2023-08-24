@@ -2,7 +2,7 @@ export class Query {
     static getMe() {
         return `
             query {
-                user: GetMe {
+                result: GetMe {
                     role {
                         permissions {
                             moduleId value module {
@@ -18,7 +18,7 @@ export class Query {
     static getUsers() {
         return `
             query {
-                users: GetUsers {
+                result: GetUsers {
                     username
                     preferredName
                 }
@@ -31,7 +31,7 @@ export class Mutation {
     static signIn(username: string, password: string) {
         return `
             mutation {
-                jwtToken: SignIn(username: "${username}", password: "${password}")
+                result: SignIn(username: "${username}", password: "${password}")
             }
         `;
     }

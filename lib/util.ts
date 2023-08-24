@@ -1,12 +1,12 @@
-import { FetchState } from "./interface";
+import { Credentials, FetchState } from "./interface";
 
 export class Util {
-    static fetch<D, E>(jwtToken: string, query: string, callback: React.Dispatch<FetchState<D, E>>) {
+    static fetch<D>(credentials: Credentials, query: string, callback: React.Dispatch<FetchState<D>>) {
         fetch("http://10.0.2.2:8080", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": jwtToken
+                "Authorization": credentials.jwtToken
             },
             body: JSON.stringify({
                 query
@@ -15,24 +15,13 @@ export class Util {
         .then(res => res.json())
         .then(res => {
             if (res.data) {
-                callback({
-                    loading: false,
-                    error: undefined,
-                    data: res.data
-                });
+                callback(res.data.result as D);
             } else {
-                callback({
-                    loading: false,
-                    error: res.errors[0],
-                    data: undefined
-                });
+                throw res.errors[0];
             }
-        }).catch(err => {
-            callback({
-                loading: false,
-                error: err,
-                data: undefined
-            });
+        }).catch((err: Error) => {
+            console.error(err);
+            callback(err);
         });
     }
 }

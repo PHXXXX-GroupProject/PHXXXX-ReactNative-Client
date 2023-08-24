@@ -1,16 +1,16 @@
 import React from "react";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import EncryptedStorage from "react-native-encrypted-storage";
 import { ScrollView, Text, View, Image, DevSettings } from "react-native";
-import { Avatar, BottomNavigation, Button, TextInput, Appbar, Banner } from "react-native-paper";
+import { Avatar, BottomNavigation, Button, TextInput, Appbar } from "react-native-paper";
 import { LogInScreenStyles } from "./style";
 import { UsersScene } from "./scene";
-import { FetchState, SceneData } from "../lib/interface";
-import { GraphQLError } from "graphql";
+import { Credentials, FetchState, SceneRoute } from "../lib/interface";
 import { Mutation, Query } from "../lib/graphql";
 import { Util } from "../lib/util";
 import { AuthCtx } from "../App";
 import { Key } from "../lib/enum";
+import { User } from "../lib/type";
+import { ErrorBanner } from "./component";
 
 export function SplashScreen() {
     return (
@@ -53,7 +53,7 @@ export function LoginScreen() {
                 style={LogInScreenStyles.button}
                 mode="outlined"
                 onPress={() => {
-                    Util.fetch("", Mutation.signIn(username, password), callback);
+                    Util.fetch({ jwtToken: "" }, Mutation.signIn(username, password), callback);
                 }}
             >
                 Sign In
@@ -62,7 +62,7 @@ export function LoginScreen() {
                 style={LogInScreenStyles.button}
                 mode="outlined"
                 onPress={() => {
-                    Util.fetch("", Mutation.signIn(username, password), callback);
+                    Util.fetch({ jwtToken: "" }, Mutation.signIn(username, password), callback);
                 }}
             >
                 Sign Up
@@ -71,54 +71,46 @@ export function LoginScreen() {
     );
 };
 
-const module2Icon = {
-    Exams: "book",
-    Results: "pencil",
-    Users: "account",
-    Roles: "account-tie"
-} as any;
+const module2IconScene: Record<string, [string, () => React.JSX.Element]> = {
+    Exams: ["book", () => <ScrollView><Text>Exams</Text></ScrollView>],
+    Results: ["pencil", () => <Text>Results</Text>],
+    Users: ["account", () => <UsersScene></UsersScene>],
+    Roles: ["account-tie", () => <Text>Roles</Text>]
+};
 
 export function HomeScreen() {
-    const credentials = React.useContext(AuthCtx).data;
-    const [fetchState, setFetchState] = React.useState<FetchState<any, GraphQLError>>({
-        loading: true,
-        error: undefined,
-        data: undefined
-    });
-    React.useEffect(() => {
-        Util.fetch(credentials.jwtToken!, Query.getMe(), setFetchState);
-    }, [fetchState.loading]);
-
+    const credentials = React.useContext(AuthCtx).credentials;
+    const [fetchResult, setFetchResult] = React.useState<FetchState<User>>(null);
     const [index, setIndex] = React.useState(0);
-
-    if (fetchState.loading) {
+    
+    if (fetchResult === null) {
+        Util.fetch(credentials as Credentials, Query.getMe(), setFetchResult);
         return <Text>Loading</Text>
-    } else if (fetchState.error) {
-        return <Banner
-            visible={true}
-            icon={() => <Icon size={50} name="error"/>}
-            actions={[
-                {
-                  label: "RELOAD",
-                  onPress: () => {
-                    EncryptedStorage.removeItem(Key.CREDENTIALS);
-                    DevSettings.reload();
-                  }
-                }
-            ]}
-        >
-            {(fetchState.error.extensions.title as string).toUpperCase() + "\n" + fetchState.error.extensions.suggestion}
-        </Banner>
+    } else if (fetchResult instanceof Error) {
+        return <ErrorBanner error={fetchResult} actions={[
+            {
+              label: "RELOAD",
+              onPress: () => {
+                EncryptedStorage.removeItem(Key.CREDENTIALS);
+                DevSettings.reload();
+              }
+            }
+        ]}/>
     } else {
-        const sceneData: SceneData[] = [];
-        const permissions = fetchState.data.user.role.permissions as any[];
+        const sceneRoutes: SceneRoute[] = [];
+        const sceneMap: Record<string, () => React.JSX.Element> = {};
+
+        const permissions = fetchResult.role.permissions;
         for (const permission of permissions) {
-            if (module2Icon.hasOwnProperty(permission.module.url) && permission.value[1] === "1") {
-                sceneData.push({
-                    key: permission.module.url,
-                    title: permission.module.url,
-                    focusedIcon: module2Icon[permission.module.url]
+            const key = permission.module.url;
+            if (module2IconScene.hasOwnProperty(key) && permission.value[1] === "1") {
+                sceneRoutes.push({
+                    key: key,
+                    title: key,
+                    focusedIcon: module2IconScene[key][0]
                 });
+
+                sceneMap[key] = module2IconScene[key][1];
             }
         }
 
@@ -134,14 +126,9 @@ export function HomeScreen() {
                     />
                 </Appbar.Header>
                 <BottomNavigation
-                    navigationState={{ index, routes: sceneData }}
+                    navigationState={{ index, routes: sceneRoutes }}
                     onIndexChange={setIndex}
-                    renderScene={BottomNavigation.SceneMap({
-                        Exams: () => <ScrollView><Text>Exams</Text></ScrollView>,
-                        Results: () => <Text>Results</Text>,
-                        Users: () => <UsersScene></UsersScene>,
-                        Roles: () => <Text>Roles</Text>
-                    })}
+                    renderScene={BottomNavigation.SceneMap(sceneMap)}
                 />
             </View>
         );

@@ -5,57 +5,51 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { PaperProvider } from "react-native-paper";
 import { LoginScreen, HomeScreen, SplashScreen } from "./ui/screen";
 import { AuthContext, Credentials, FetchState } from "./lib/interface";
-import { GraphQLError } from "graphql";
 import { Key } from "./lib/enum";
 
 export const AuthCtx = React.createContext<AuthContext>({} as AuthContext);
 const Stack = createNativeStackNavigator();
 
-function App() {    
-    const [context, setContext] = React.useState<FetchState<any, GraphQLError>>({
-        loading: true,
-        error: undefined,
-        data: undefined
-    });
-    async function callback(context: FetchState<Credentials, GraphQLError>) {
-        if (context.data) {
-            console.log("NEW_CREDENTIALS", context.data);
-            await EncryptedStorage.setItem(Key.CREDENTIALS, JSON.stringify(context.data));
+function App() {
+    const [credentials, setCredentials] = React.useState<FetchState<Credentials>>(null);
+    async function callback(context: FetchState<Credentials>) {
+        if (context && !(context instanceof Error)) {
+            console.log("NEW_CREDENTIALS", context);
+            await EncryptedStorage.setItem(Key.CREDENTIALS, JSON.stringify(context));
         }
-        setContext(context);
+        setCredentials(context);
     }
 
-    React.useEffect(() => {
+    if (credentials === null) {
         EncryptedStorage.getItem(Key.CREDENTIALS).then(stringifiedCredentials => {
-            setContext({
-                loading: false,
-                data: JSON.parse(stringifiedCredentials!) as Credentials,
-                error: undefined
-            });
+            setCredentials(JSON.parse(stringifiedCredentials!) as Credentials);
+        }).catch((err: Error) => {
+            console.error(err);
+            setCredentials(err);
         });
-    }, []);
+    }
 
     return (
         <PaperProvider>
             <NavigationContainer>
-                <AuthCtx.Provider value={{ ...context, callback }}>
+                <AuthCtx.Provider value={{ credentials, callback }}>
                     <Stack.Navigator screenOptions={{ headerShown: false }}>
                         {
-                            (context.loading) ? (
+                            (credentials === null) ? (
                                 <Stack.Screen
                                     name="Splash"
                                     component={SplashScreen}
                                 />
                             ) : (
-                                (context.data) ? (
+                                (credentials instanceof Error) ? (
                                     <Stack.Screen
-                                        name="Home"
-                                        component={HomeScreen}
+                                    name="Login"
+                                    component={LoginScreen}
                                     />
                                 ) : (
                                     <Stack.Screen
-                                        name="Login"
-                                        component={LoginScreen}
+                                        name="Home"
+                                        component={HomeScreen}
                                     />
                                 )
                             )
