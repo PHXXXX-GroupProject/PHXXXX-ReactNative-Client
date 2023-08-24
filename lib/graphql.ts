@@ -15,12 +15,35 @@ export class Query {
         `;
     }
 
+    static getUser(username: string) {
+        return `
+            query {
+                result: GetUser(username: "${username}") {
+                    preferredName
+                    username
+                    roleId
+                }
+            }
+        `;
+    }
+
     static getUsers() {
         return `
             query {
                 result: GetUsers {
                     username
                     preferredName
+                }
+            }
+        `;
+    }
+
+    static getRoles() {
+        return `
+            query {
+                result: GetRoles {
+                    _id
+                    name
                 }
             }
         `;

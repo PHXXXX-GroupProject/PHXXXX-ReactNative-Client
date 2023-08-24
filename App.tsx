@@ -3,16 +3,16 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { PaperProvider } from "react-native-paper";
-import { LoginScreen, HomeScreen, SplashScreen } from "./ui/screen";
-import { AuthContext, Credentials, FetchState } from "./lib/interface";
+import { LoginScreen, HomeScreen, SplashScreen, ManageUserScreen } from "./ui/screen";
+import { AuthContext, Credentials, FetchResult } from "./lib/interface";
 import { Key } from "./lib/enum";
 
 export const AuthCtx = React.createContext<AuthContext>({} as AuthContext);
 const Stack = createNativeStackNavigator();
 
 function App() {
-    const [credentials, setCredentials] = React.useState<FetchState<Credentials>>(null);
-    async function callback(context: FetchState<Credentials>) {
+    const [credentials, setCredentials] = React.useState<FetchResult<Credentials>>(null);
+    async function callback(context: FetchResult<Credentials>) {
         if (context && !(context instanceof Error)) {
             console.log("NEW_CREDENTIALS", context);
             await EncryptedStorage.setItem(Key.CREDENTIALS, JSON.stringify(context));
@@ -47,10 +47,16 @@ function App() {
                                     component={LoginScreen}
                                     />
                                 ) : (
-                                    <Stack.Screen
+                                    [<Stack.Screen
+                                        key="0"
                                         name="Home"
                                         component={HomeScreen}
-                                    />
+                                    />,
+                                    <Stack.Screen
+                                        key="1"
+                                        name="ManageUserScreen"
+                                        component={ManageUserScreen}
+                                    />]
                                 )
                             )
                         }

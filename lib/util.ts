@@ -1,7 +1,7 @@
-import { Credentials, FetchState } from "./interface";
+import { Credentials, FetchResult } from "./interface";
 
 export class Util {
-    static fetch<D>(credentials: Credentials, query: string, callback: React.Dispatch<FetchState<D>>) {
+    static fetch<D>(credentials: Credentials, query: string, callback: React.Dispatch<FetchResult<D>>) {
         fetch("http://10.0.2.2:8080", {
             method: "POST",
             headers: {

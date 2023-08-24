@@ -18,3 +18,21 @@ export const LogInScreenStyles = StyleSheet.create({
         margin: 10
     }
 });
+
+export const ManageScreenStyles = StyleSheet.create({
+    view: {
+        padding: 20
+    },
+    avatar: {
+        alignSelf: "center"
+    },
+    input: {
+        marginVertical: 20,
+    },
+    heading: {
+        marginVertical: 20
+    },
+    button: {
+        margin: 20
+    }
+});

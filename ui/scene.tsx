@@ -4,15 +4,17 @@ import { ScrollView } from "react-native";
 import { ActivityIndicator, Banner, List } from "react-native-paper";
 import { Query } from "../lib/graphql";
 import { AuthCtx } from "../App";
-import { Credentials, FetchState } from "../lib/interface";
+import { Credentials, FetchResult } from "../lib/interface";
 import { GraphQLError, isNullableType } from "graphql";
 import { Util } from "../lib/util";
 import { User } from "../lib/type";
 import { ErrorBanner } from "./component";
+import { useNavigation } from "@react-navigation/native";
 
 export function UsersScene() {
+    const navigation = useNavigation();
     const credentials = React.useContext(AuthCtx).credentials;
-    const [fetchResult, setFetchResult] = React.useState<FetchState<User[]>>(null);
+    const [fetchResult, setFetchResult] = React.useState<FetchResult<User[]>>(null);
     
     if (fetchResult === null) {
         Util.fetch(credentials as Credentials, Query.getUsers(), setFetchResult);
@@ -29,6 +31,9 @@ export function UsersScene() {
                         titleStyle={{ fontSize: 20 }}
                         description={item.preferredName}
                         left={props => <Icon {...props} size={70} name="person" />}
+                        onPress={() => {
+                            navigation.navigate("ManageUserScreen", { username: item.username });
+                        }}
                     />
                 })
             }

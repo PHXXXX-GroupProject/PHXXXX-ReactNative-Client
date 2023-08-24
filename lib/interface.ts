@@ -1,4 +1,4 @@
-export type FetchState<D> = D | Error | null;
+export type FetchResult<D> = D | Error | null;
 
 export interface AuthActions {
     signIn: (username: string, password: string) => Promise<void>;
@@ -6,8 +6,8 @@ export interface AuthActions {
 }
 
 export interface AuthContext {
-    credentials: FetchState<Credentials>;
-    callback: React.Dispatch<FetchState<Credentials>>
+    credentials: FetchResult<Credentials>;
+    callback: React.Dispatch<FetchResult<Credentials>>
 }
 
 export interface Credentials {
