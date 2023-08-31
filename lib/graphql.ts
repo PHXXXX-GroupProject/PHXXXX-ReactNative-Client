@@ -15,13 +15,43 @@ export class Query {
         `;
     }
 
-    static getUser(username: string) {
+    static getUser(id: string) {
         return `
             query {
-                result: GetUser(username: "${username}") {
+                result: GetUser(id: "${id}") {
                     preferredName
                     username
                     roleId
+                }
+            }
+        `;
+    }
+
+    static getRole(id: string) {
+        return `
+            query {
+                result: GetRole(id: "${id}") {
+                    name
+                    permissions {
+                        module {
+                            name
+                        }
+                        value
+                    }
+                }
+            }
+        `;
+    }
+
+    static getExam(id: string) {
+        return `
+            query {
+                result: GetExam(id: "${id}") {
+                    name
+                    questions {
+                        _id
+                        prompt
+                    }
                 }
             }
         `;
@@ -31,6 +61,7 @@ export class Query {
         return `
             query {
                 result: GetUsers {
+                    _id
                     username
                     preferredName
                 }
@@ -42,6 +73,17 @@ export class Query {
         return `
             query {
                 result: GetRoles {
+                    _id
+                    name
+                }
+            }
+        `;
+    }
+
+    static getExams() {
+        return `
+            query {
+                result: GetExams {
                     _id
                     name
                 }

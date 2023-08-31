@@ -3,7 +3,7 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import { ScrollView, Text, View, Image, DevSettings } from "react-native";
 import { Avatar, BottomNavigation, Button, TextInput, Appbar, ActivityIndicator, Headline, RadioButton } from "react-native-paper";
 import { LogInScreenStyles, ManageScreenStyles } from "./style";
-import { UsersScene } from "./scene";
+import { ExamsScene, RolesScene, UsersScene } from "./scene";
 import { Credentials, FetchResult, SceneRoute } from "../lib/interface";
 import { Mutation, Query } from "../lib/graphql";
 import { Util } from "../lib/util";
@@ -69,13 +69,13 @@ export function LoginScreen() {
             </Button>
         </View>
     );
-};
+}
 
 const module2IconScene: Record<string, [string, () => React.JSX.Element]> = {
-    Exams: ["book", () => <ScrollView><Text>Exams</Text></ScrollView>],
+    Exams: ["book", () => <ExamsScene></ExamsScene>],
     Results: ["pencil", () => <Text>Results</Text>],
     Users: ["account", () => <UsersScene></UsersScene>],
-    Roles: ["account-tie", () => <Text>Roles</Text>]
+    Roles: ["account-tie", () => <RolesScene></RolesScene>]
 };
 
 export function HomeScreen() {
@@ -141,7 +141,7 @@ export function ManageUserScreen({ route }: any) {
     const [roleId, setRoleId] = React.useState("");
 
     if (userFetchResult === null) {
-        Util.fetch(credentials as Credentials, Query.getUser(route.params.username), setUserFetchResult);
+        Util.fetch(credentials as Credentials, Query.getUser(route.params.id), setUserFetchResult);
         Util.fetch(credentials as Credentials, Query.getRoles(), setRolesFetchResult);
         return <ActivityIndicator animating={true} size={100} style={{ marginTop: "50%" }} />;
     } else if (userFetchResult instanceof Error) {
@@ -168,7 +168,7 @@ export function ManageUserScreen({ route }: any) {
                 <ScrollView style={ManageScreenStyles.view}>
                     <Avatar.Icon
                         style={ManageScreenStyles.avatar}
-                        size={150} icon="folder"
+                        size={150} icon="account-tie"
                     />
                     <TextInput
                         label="Username"
