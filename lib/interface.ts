@@ -1,3 +1,5 @@
+export type Credentials = string;
+
 export type FetchResult<D> = D | Error | null;
 
 export interface AuthActions {
@@ -8,10 +10,6 @@ export interface AuthActions {
 export interface AuthContext {
     credentials: FetchResult<Credentials>;
     callback: React.Dispatch<FetchResult<Credentials>>
-}
-
-export interface Credentials {
-    jwtToken: string;
 }
 
 export interface SceneRoute {

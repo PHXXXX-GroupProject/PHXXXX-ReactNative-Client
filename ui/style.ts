@@ -19,7 +19,7 @@ export const LogInScreenStyles = StyleSheet.create({
     }
 });
 
-export const ManageScreenStyles = StyleSheet.create({
+export const ManageFineStyles = StyleSheet.create({
     view: {
         padding: 20
     },

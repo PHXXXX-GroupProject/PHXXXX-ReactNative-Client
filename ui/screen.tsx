@@ -1,15 +1,15 @@
 import React from "react";
 import EncryptedStorage from "react-native-encrypted-storage";
-import { ScrollView, Text, View, Image, DevSettings } from "react-native";
-import { Avatar, BottomNavigation, Button, TextInput, Appbar, ActivityIndicator, Headline, RadioButton } from "react-native-paper";
-import { LogInScreenStyles, ManageScreenStyles } from "./style";
-import { ExamsScene, RolesScene, UsersScene } from "./scene";
+import { ScrollView, View, Image, DevSettings } from "react-native";
+import { Avatar, BottomNavigation, Button, TextInput, Appbar, ActivityIndicator, Headline, Text } from "react-native-paper";
+import { LogInScreenStyles, ManageFineStyles } from "./style";
+import { FinesScene } from "./scene";
 import { Credentials, FetchResult, SceneRoute } from "../lib/interface";
 import { Mutation, Query } from "../lib/graphql";
 import { Util } from "../lib/util";
 import { AuthCtx } from "../App";
 import { Key } from "../lib/enum";
-import { Role, User } from "../lib/type";
+import { Fine, User } from "../lib/type";
 import { ErrorBanner } from "./component";
 
 export function SplashScreen() {
@@ -72,10 +72,7 @@ export function LoginScreen() {
 }
 
 const module2IconScene: Record<string, [string, () => React.JSX.Element]> = {
-    Exams: ["book", () => <ExamsScene></ExamsScene>],
-    Results: ["pencil", () => <Text>Results</Text>],
-    Users: ["account", () => <UsersScene></UsersScene>],
-    Roles: ["account-tie", () => <RolesScene></RolesScene>]
+    Fines: ["pencil", () => <FinesScene></FinesScene>]
 };
 
 export function HomeScreen() {
@@ -99,7 +96,7 @@ export function HomeScreen() {
     } else {
         const sceneRoutes: SceneRoute[] = [];
         const sceneMap: Record<string, () => React.JSX.Element> = {};
-
+        
         const permissions = fetchResult.role.permissions;
         for (const permission of permissions) {
             const key = permission.module.url;
@@ -134,18 +131,16 @@ export function HomeScreen() {
     }
 }
 
-export function ManageUserScreen({ route }: any) {
+export function ManageFineScreen({ route }: any) {
     const credentials = React.useContext(AuthCtx).credentials;
-    const [userFetchResult, setUserFetchResult] = React.useState<FetchResult<User>>(null);
-    const [rolesFetchResult, setRolesFetchResult] = React.useState<FetchResult<Role[]>>(null);
+    const [fetchResult, setFetchResult] = React.useState<FetchResult<Fine>>(null);
     const [roleId, setRoleId] = React.useState("");
 
-    if (userFetchResult === null) {
-        Util.fetch(credentials as Credentials, Query.getUser(route.params.id), setUserFetchResult);
-        Util.fetch(credentials as Credentials, Query.getRoles(), setRolesFetchResult);
+    if (fetchResult === null) {
+        Util.fetch(credentials as Credentials, Query.getFine(route.params.id), setFetchResult);
         return <ActivityIndicator animating={true} size={100} style={{ marginTop: "50%" }} />;
-    } else if (userFetchResult instanceof Error) {
-        return <ErrorBanner error={userFetchResult} actions={[
+    } else if (fetchResult instanceof Error) {
+        return <ErrorBanner error={fetchResult} actions={[
             {
                 label: "RELOAD",
                 onPress: () => {
@@ -158,48 +153,23 @@ export function ManageUserScreen({ route }: any) {
         return (
             <View style={{ flex: 1 }}>
                 <Appbar.Header>
-                    <Appbar.Content title="Manage User" />
+                    <Appbar.Content title="Manage Fine" />
                     <Appbar.Action icon="account" onPress={() => { }} />
                     <Appbar.Action icon="logout" onPress={() => {
                         EncryptedStorage.removeItem(Key.CREDENTIALS);
                         DevSettings.reload();
                     }} />
                 </Appbar.Header>
-                <ScrollView style={ManageScreenStyles.view}>
+                <ScrollView style={ManageFineStyles.view}>
                     <Avatar.Icon
-                        style={ManageScreenStyles.avatar}
+                        style={ManageFineStyles.avatar}
                         size={150} icon="account-tie"
                     />
-                    <TextInput
-                        label="Username"
-                        value={userFetchResult.username}
-                        mode="outlined"
-                        disabled={true}
-                        style={ManageScreenStyles.input}
-                    />
-                    <TextInput
-                        label="Preferred Name"
-                        value={userFetchResult.preferredName ? userFetchResult.preferredName : ""}
-                        mode="outlined"
-                        style={ManageScreenStyles.input}
-                    />
-                    <Headline style={ManageScreenStyles.heading}>Role</Headline>
-                    <RadioButton.Group onValueChange={roleId => setRoleId(roleId)} value={roleId}>
-                        {
-                            (rolesFetchResult && !(rolesFetchResult instanceof Error)) ? (
-                                rolesFetchResult.map(role => {
-                                    return <RadioButton.Item
-                                        key={role._id}
-                                        style={ManageScreenStyles.input}
-                                        label={role.name}
-                                        value={role._id}
-                                    />
-                                })
-                            ) : (
-                                <View></View>
-                            )
-                        }
-                    </RadioButton.Group>
+                    <Headline style={ManageFineStyles.heading}>Officer</Headline>
+                    <Text style={ManageFineStyles.input}>{fetchResult.officer.username}</Text>
+                    <Headline style={ManageFineStyles.heading}>Time</Headline>
+                    <Text style={ManageFineStyles.input}>{fetchResult.time}</Text>
+                    <Headline style={ManageFineStyles.heading}>Offenses</Headline>
                 </ScrollView>
             </View>
         );

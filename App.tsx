@@ -3,26 +3,30 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { PaperProvider } from "react-native-paper";
-import { LoginScreen, HomeScreen, SplashScreen, ManageUserScreen } from "./ui/screen";
+import { LoginScreen, HomeScreen, SplashScreen, ManageFineScreen } from "./ui/screen";
 import { AuthContext, Credentials, FetchResult } from "./lib/interface";
 import { Key } from "./lib/enum";
 
 export const AuthCtx = React.createContext<AuthContext>({} as AuthContext);
 const Stack = createNativeStackNavigator();
 
-function App() {
+export default function App() {
     const [credentials, setCredentials] = React.useState<FetchResult<Credentials>>(null);
-    async function callback(context: FetchResult<Credentials>) {
-        if (context && !(context instanceof Error)) {
-            console.log("NEW_CREDENTIALS", context);
-            await EncryptedStorage.setItem(Key.CREDENTIALS, JSON.stringify(context));
+    async function setCredentialsProxy(result: FetchResult<Credentials>) {
+        if (result && !(result instanceof Error)) {
+            console.log("NEW_CREDENTIALS", result);
+            await EncryptedStorage.setItem(Key.CREDENTIALS, result);
         }
-        setCredentials(context);
+        setCredentials(result);
     }
 
     if (credentials === null) {
-        EncryptedStorage.getItem(Key.CREDENTIALS).then(stringifiedCredentials => {
-            setCredentials(JSON.parse(stringifiedCredentials!) as Credentials);
+        EncryptedStorage.getItem(Key.CREDENTIALS).then(credentials => {
+            if (credentials === null) {
+                throw Error("Session expired. Please login again");
+            } else {
+                setCredentials(credentials);
+            }
         }).catch((err: Error) => {
             console.error(err);
             setCredentials(err);
@@ -32,7 +36,7 @@ function App() {
     return (
         <PaperProvider>
             <NavigationContainer>
-                <AuthCtx.Provider value={{ credentials, callback }}>
+                <AuthCtx.Provider value={{ credentials, callback: setCredentialsProxy }}>
                     <Stack.Navigator screenOptions={{ headerShown: false }}>
                         {
                             (credentials === null) ? (
@@ -54,8 +58,8 @@ function App() {
                                     />,
                                     <Stack.Screen
                                         key="1"
-                                        name="ManageUserScreen"
-                                        component={ManageUserScreen}
+                                        name="ManageFineScreen"
+                                        component={ManageFineScreen}
                                     />]
                                 )
                             )
@@ -66,5 +70,3 @@ function App() {
         </PaperProvider>
     );
 }
-
-export default App;

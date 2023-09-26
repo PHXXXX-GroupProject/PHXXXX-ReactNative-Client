@@ -43,14 +43,23 @@ export class Query {
         `;
     }
 
-    static getExam(id: string) {
+    static getFine(id: string) {
         return `
-            query {
-                result: GetExam(id: "${id}") {
-                    name
-                    questions {
-                        _id
-                        prompt
+        query {
+            result: GetFine(id: "${id}") {
+                    time
+                    offender {
+                        username
+                    }
+                    offenses {
+                        amount
+                        name
+                    }
+                    officer {
+                        username
+                    }
+                    payment {
+                        time
                     }
                 }
             }
@@ -80,12 +89,13 @@ export class Query {
         `;
     }
 
-    static getExams() {
+    static getFines() {
         return `
             query {
-                result: GetExams {
-                    _id
-                    name
+                result: GetMe {
+                    fines {
+                        _id
+                    }
                 }
             }
         `;

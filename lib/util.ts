@@ -6,7 +6,7 @@ export class Util {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": credentials.jwtToken
+                "Authorization": credentials
             },
             body: JSON.stringify({
                 query

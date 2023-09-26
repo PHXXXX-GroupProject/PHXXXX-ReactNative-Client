@@ -6,7 +6,7 @@ import { Query } from "../lib/graphql";
 import { AuthCtx } from "../App";
 import { Credentials, FetchResult } from "../lib/interface";
 import { Util } from "../lib/util";
-import { Exam, Role, User } from "../lib/type";
+import { Role, User } from "../lib/type";
 import { ErrorBanner } from "./component";
 import { useNavigation } from "@react-navigation/native";
 
@@ -69,27 +69,27 @@ export function UsersScene() {
     }
 }
 
-export function ExamsScene() {
+export function FinesScene() {
     const navigation = useNavigation();
     const credentials = React.useContext(AuthCtx).credentials;
-    const [fetchResult, setFetchResult] = React.useState<FetchResult<Exam[]>>(null);
+    const [fetchResult, setFetchResult] = React.useState<FetchResult<User>>(null);
     
     if (fetchResult === null) {
-        Util.fetch(credentials as Credentials, Query.getExams(), setFetchResult);
+        Util.fetch(credentials as Credentials, Query.getFines(), setFetchResult);
         return <ActivityIndicator animating={true} size={100} style={{marginTop: "50%"}}/>;
     } else if (fetchResult instanceof Error) {
         return <ErrorBanner error={fetchResult} actions={[]}/>
     } else {
         return <ScrollView>
             {
-                fetchResult.map((item, i) => {
+                fetchResult.fines.map((item, i) => {
                     return <List.Item
                         key={i}
-                        title={item.name}
+                        title={item._id}
                         titleStyle={{ fontSize: 20 }}
                         left={props => <Icon {...props} size={70} name="person" />}
                         onPress={() => {
-                            // navigation.navigate("ManageExamScreen", { id: item._id });
+                            navigation.navigate("ManageFineScreen", { id: item._id });
                         }}
                     />
                 })

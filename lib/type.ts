@@ -16,29 +16,17 @@ export type Scalars = {
   ObjectId: { input: string; output: string; }
 };
 
-export type Answer = {
-  __typename?: 'Answer';
+export type Fine = {
+  __typename?: 'Fine';
   _id: Scalars['ObjectId']['output'];
-  questionId: Scalars['ObjectId']['output'];
-  text: Scalars['String']['output'];
-};
-
-export type Exam = {
-  __typename?: 'Exam';
-  _id: Scalars['ObjectId']['output'];
-  durationHours: Scalars['Int']['output'];
-  name: Scalars['String']['output'];
-  questionIds: Array<Scalars['ObjectId']['output']>;
-  questions: Array<Question>;
-  startTime: Scalars['Date']['output'];
-};
-
-export type ExamSitting = {
-  __typename?: 'ExamSitting';
-  _id: Scalars['ObjectId']['output'];
-  answers: Array<Answer>;
-  exam: Exam;
-  user: User;
+  offender: User;
+  offenderId: Scalars['ObjectId']['output'];
+  offenseIds: Array<Scalars['ObjectId']['output']>;
+  offenses: Array<Offense>;
+  officer: User;
+  officerId: Scalars['ObjectId']['output'];
+  payment?: Maybe<Payment>;
+  time: Scalars['Date']['output'];
 };
 
 export type Module = {
@@ -59,6 +47,18 @@ export type MutationSignInArgs = {
   username: Scalars['String']['input'];
 };
 
+export type Offense = {
+  __typename?: 'Offense';
+  _id: Scalars['ObjectId']['output'];
+  amount: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type Payment = {
+  __typename?: 'Payment';
+  time: Scalars['Date']['output'];
+};
+
 export type Permission = {
   __typename?: 'Permission';
   _id: Scalars['ObjectId']['output'];
@@ -69,17 +69,16 @@ export type Permission = {
 
 export type Query = {
   __typename?: 'Query';
-  GetExam?: Maybe<Exam>;
-  GetExams: Array<Exam>;
+  GetFine: Fine;
   GetMe: User;
-  GetRole?: Maybe<Role>;
+  GetRole: Role;
   GetRoles: Array<Role>;
-  GetUser?: Maybe<User>;
+  GetUser: User;
   GetUsers: Array<User>;
 };
 
 
-export type QueryGetExamArgs = {
+export type QueryGetFineArgs = {
   id: Scalars['ObjectId']['input'];
 };
 
@@ -91,12 +90,6 @@ export type QueryGetRoleArgs = {
 
 export type QueryGetUserArgs = {
   id: Scalars['ObjectId']['input'];
-};
-
-export type Question = {
-  __typename?: 'Question';
-  _id: Scalars['ObjectId']['output'];
-  prompt: Scalars['String']['output'];
 };
 
 export type Role = {
@@ -115,6 +108,8 @@ export type User = {
   __typename?: 'User';
   _id: Scalars['ObjectId']['output'];
   avatar?: Maybe<Scalars['String']['output']>;
+  fineIds: Array<Scalars['ObjectId']['output']>;
+  fines: Array<Fine>;
   preferredName?: Maybe<Scalars['String']['output']>;
   role: Role;
   roleId: Scalars['ObjectId']['output'];
