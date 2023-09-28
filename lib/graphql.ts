@@ -1,3 +1,5 @@
+import { MutationPayFineArgs } from "./type";
+
 export class Query {
     static getMe() {
         return `
@@ -95,6 +97,9 @@ export class Query {
                 result: GetMe {
                     fines {
                         _id
+                        payment {
+                            time
+                        }
                     }
                 }
             }
@@ -107,6 +112,20 @@ export class Mutation {
         return `
             mutation {
                 result: SignIn(username: "${username}", password: "${password}")
+            }
+        `;
+    }
+
+    static payFine(fineId: string, cardNo: string, cardExpMonth: string, cardExpYear: string, cardCVC: string) {
+        return `
+            mutation {
+                result: PayFine(info: {
+                    fineId: "${fineId}",
+                    cardNo: "${cardNo}",
+                    cardExpMonth: "${cardExpMonth}",
+                    cardExpYear: "${cardExpYear}",
+                    cardCVC: "${cardCVC}"
+                })
             }
         `;
     }

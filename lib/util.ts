@@ -1,7 +1,8 @@
-import { Credentials, FetchResult } from "./interface";
+import { FetchResult } from "./interface";
+import { Mutation } from "./type";
 
 export class Util {
-    static fetch<D>(credentials: Credentials, query: string, callback: React.Dispatch<FetchResult<D>>) {
+    static fetch<D>(credentials: Mutation["SignIn"], query: string, callback: React.Dispatch<FetchResult<D>>) {
         fetch("http://10.0.2.2:8080", {
             method: "POST",
             headers: {

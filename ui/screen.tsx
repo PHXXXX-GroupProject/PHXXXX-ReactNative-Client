@@ -4,13 +4,14 @@ import { ScrollView, View, Image, DevSettings } from "react-native";
 import { Avatar, BottomNavigation, Button, TextInput, Appbar, ActivityIndicator, Headline, Text, DataTable, FAB } from "react-native-paper";
 import { LogInScreenStyles, ManageFineStyles } from "./style";
 import { FinesScene } from "./scene";
-import { Credentials, FetchResult, SceneRoute } from "../lib/interface";
-import { Mutation, Query } from "../lib/graphql";
+import { FetchResult, SceneRoute } from "../lib/interface";
+import { Mutation as GQLMutation, Query as GQLQuery } from "../lib/graphql";
 import { Util } from "../lib/util";
 import { AuthCtx } from "../App";
 import { Key } from "../lib/enum";
-import { Fine, User } from "../lib/type";
+import { Query, Mutation } from "../lib/type";
 import { ErrorBanner } from "./component";
+import { useNavigation } from "@react-navigation/native";
 
 export function SplashScreen() {
     return (
@@ -27,7 +28,7 @@ export function SplashScreen() {
 export function LoginScreen() {
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
-    const { callback } = React.useContext(AuthCtx);
+    const { setCredentialsProxy } = React.useContext(AuthCtx);
 
     return (
         <View style={LogInScreenStyles.view}>
@@ -53,7 +54,7 @@ export function LoginScreen() {
                 style={LogInScreenStyles.button}
                 mode="outlined"
                 onPress={() => {
-                    Util.fetch({ jwtToken: "" }, Mutation.signIn(username, password), callback);
+                    Util.fetch({ jwtToken: "" }, Mutation.signIn(username, password), setCredentialsProxy);
                 }}
             >
                 Sign In
@@ -62,7 +63,7 @@ export function LoginScreen() {
                 style={LogInScreenStyles.button}
                 mode="outlined"
                 onPress={() => {
-                    Util.fetch({ jwtToken: "" }, Mutation.signIn(username, password), callback);
+                    Util.fetch({ jwtToken: "" }, Mutation.signIn(username, password), setCredentialsProxy);
                 }}
             >
                 Sign Up
@@ -77,11 +78,11 @@ const module2IconScene: Record<string, [string, () => React.JSX.Element]> = {
 
 export function HomeScreen() {
     const credentials = React.useContext(AuthCtx).credentials;
-    const [fetchResult, setFetchResult] = React.useState<FetchResult<User>>(null);
+    const [fetchResult, setFetchResult] = React.useState<FetchResult<Query["GetMe"]>>(null);
     const [index, setIndex] = React.useState(0);
 
     if (fetchResult === null) {
-        Util.fetch(credentials as Credentials, Query.getMe(), setFetchResult);
+        Util.fetch(credentials, GQLQuery.getMe(), setFetchResult);
         return <ActivityIndicator animating={true} size={100} style={{ marginTop: "50%" }} />;
     } else if (fetchResult instanceof Error) {
         return <ErrorBanner error={fetchResult} actions={[
@@ -132,12 +133,12 @@ export function HomeScreen() {
 }
 
 export function ManageFineScreen({ route }: any) {
+    const navigation = useNavigation();
     const credentials = React.useContext(AuthCtx).credentials;
-    const [fetchResult, setFetchResult] = React.useState<FetchResult<Fine>>(null);
-    const [roleId, setRoleId] = React.useState("");
+    const [fetchResult, setFetchResult] = React.useState<FetchResult<Query["GetFine"]>>(null);
 
     if (fetchResult === null) {
-        Util.fetch(credentials as Credentials, Query.getFine(route.params.id), setFetchResult);
+        Util.fetch(credentials, GQLQuery.getFine(route.params.id), setFetchResult);
         return <ActivityIndicator animating={true} size={100} style={{ marginTop: "50%" }} />;
     } else if (fetchResult instanceof Error) {
         return <ErrorBanner error={fetchResult} actions={[
@@ -150,11 +151,6 @@ export function ManageFineScreen({ route }: any) {
             }
         ]} />
     } else {
-        const data = [
-            { name: 'John Doe', age: 30 },
-            { name: 'Jane Doe', age: 25 },
-        ];
-
         return (
             <View style={{ flex: 1 }}>
                 <Appbar.Header>
@@ -182,8 +178,8 @@ export function ManageFineScreen({ route }: any) {
                             <DataTable.Title>Type</DataTable.Title>
                             <DataTable.Title numeric>Amount</DataTable.Title>
                         </DataTable.Header>
-                        {fetchResult.offenses.map(offense => (
-                            <DataTable.Row key={offense._id}>
+                        {fetchResult.offenses.map((offense, i) => (
+                            <DataTable.Row key={i}>
                                 <DataTable.Cell>{offense.name}</DataTable.Cell>
                                 <DataTable.Cell numeric>{offense.amount}</DataTable.Cell>
                             </DataTable.Row>
@@ -191,12 +187,102 @@ export function ManageFineScreen({ route }: any) {
                     </DataTable>
                 </ScrollView>
                 <FAB
+                    disabled={fetchResult.payment !== null}
                     icon="currency-usd"
                     label="Pay"
                     style={ManageFineStyles.fab}
-                    onPress={() => console.log('Pressed')}
+                    onPress={() => navigation.navigate("PayFine", { id: route.params.id })}
                 />
             </View>
         );
+    }
+}
+
+export function PayFineScreen({ route }: any) {
+    const navigation = useNavigation();
+    const credentials = React.useContext(AuthCtx).credentials;
+    const [fetchResult, setFetchResult] = React.useState<FetchResult<Mutation["PayFine"]> | "pending">(null);
+    const [cardNo, setCardNo] = React.useState("XXXX-XXXX-XXXX-XXXX");
+    const [cardExpMonth, setCardExpMonth] = React.useState("XX");
+    const [cardExpYear, setCardExpYear] = React.useState("XX");
+    const [cardCVC, setCardCVC] = React.useState("XXX");
+
+    if (fetchResult === null) {
+        return (
+            <View style={{ flex: 1 }}>
+                <Appbar.Header>
+                    <Appbar.Content title="Manage Fine" />
+                    <Appbar.Action icon="account" onPress={() => { }} />
+                    <Appbar.Action icon="logout" onPress={() => {
+                        EncryptedStorage.removeItem(Key.CREDENTIALS);
+                        DevSettings.reload();
+                    }} />
+                </Appbar.Header>
+                <ScrollView style={ManageFineStyles.view}>
+                    <Avatar.Icon
+                        style={ManageFineStyles.avatar}
+                        size={150} icon="clipboard-list"
+                    />
+                    <Text variant="titleLarge" style={ManageFineStyles.headline}>Card No.</Text>
+                    <TextInput
+                        value={cardNo}
+                        onChangeText={text => setCardNo(text)}
+                    ></TextInput>
+
+                    <Text variant="titleLarge" style={ManageFineStyles.headline}>Expiry Month</Text>
+                    <TextInput
+                        value={cardExpMonth}
+                        onChangeText={text => setCardExpMonth(text)}
+                    ></TextInput>
+
+                    <Text variant="titleLarge" style={ManageFineStyles.headline}>Expiry Year</Text>
+                    <TextInput
+                        value={cardExpYear}
+                        onChangeText={text => setCardExpYear(text)}
+                    ></TextInput>
+
+                    <Text variant="titleLarge" style={ManageFineStyles.headline}>CVC</Text>
+                    <TextInput
+                        value={cardCVC}
+                        onChangeText={text => setCardCVC(text)}
+                    ></TextInput>
+                </ScrollView>
+                <FAB
+                    icon="currency-usd"
+                    label="Confirm Payment"
+                    style={ManageFineStyles.fab}
+                    onPress={
+                        () => {
+                            setFetchResult("pending");
+                            Util.fetch(
+                                credentials,
+                                GQLMutation.payFine(
+                                    route.params.id,
+                                    cardNo,
+                                    cardExpMonth,
+                                    cardExpYear,
+                                    cardCVC
+                                ),
+                                setFetchResult
+                            );
+                        }
+                    }
+                />
+            </View>
+        );
+    } else if (fetchResult === "pending") {
+        return <ActivityIndicator animating={true} size={100} style={{ marginTop: "50%" }} />;
+    } else if (fetchResult instanceof Error) {
+        return <ErrorBanner error={fetchResult} actions={[
+            {
+                label: "RELOAD",
+                onPress: () => {
+                    EncryptedStorage.removeItem(Key.CREDENTIALS);
+                    DevSettings.reload();
+                }
+            }
+        ]} />
+    } else {
+        navigation.goBack();
     }
 }

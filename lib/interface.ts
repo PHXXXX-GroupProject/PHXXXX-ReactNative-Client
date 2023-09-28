@@ -1,4 +1,4 @@
-export type Credentials = string;
+import { Mutation } from "./type";
 
 export type FetchResult<D> = D | Error | null;
 
@@ -8,8 +8,8 @@ export interface AuthActions {
 }
 
 export interface AuthContext {
-    credentials: FetchResult<Credentials>;
-    callback: React.Dispatch<FetchResult<Credentials>>
+    credentials: Mutation["SignIn"];
+    setCredentialsProxy: React.Dispatch<FetchResult<Mutation["SignIn"]>>
 }
 
 export interface SceneRoute {

@@ -2,21 +2,20 @@ import React from "react";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { ScrollView, View } from "react-native";
 import { ActivityIndicator, Headline, List } from "react-native-paper";
-import { Query } from "../lib/graphql";
+import { Query as GQLQuery } from "../lib/graphql";
 import { AuthCtx } from "../App";
-import { Credentials, FetchResult } from "../lib/interface";
+import { FetchResult } from "../lib/interface";
 import { Util } from "../lib/util";
-import { Role, User } from "../lib/type";
+import { Query } from "../lib/type";
 import { ErrorBanner } from "./component";
 import { useNavigation } from "@react-navigation/native";
 
 export function RolesScene() {
-    const navigation = useNavigation();
     const credentials = React.useContext(AuthCtx).credentials;
-    const [fetchResult, setFetchResult] = React.useState<FetchResult<Role[]>>(null);
+    const [fetchResult, setFetchResult] = React.useState<FetchResult<Query["GetRoles"]>>(null);
     
     if (fetchResult === null) {
-        Util.fetch(credentials as Credentials, Query.getRoles(), setFetchResult);
+        Util.fetch(credentials, GQLQuery.getRoles(), setFetchResult);
         return <ActivityIndicator animating={true} size={100} style={{marginTop: "50%"}}/>;
     } else if (fetchResult instanceof Error) {
         return <ErrorBanner error={fetchResult} actions={[]}/>
@@ -42,10 +41,10 @@ export function RolesScene() {
 export function UsersScene() {
     const navigation = useNavigation();
     const credentials = React.useContext(AuthCtx).credentials;
-    const [fetchResult, setFetchResult] = React.useState<FetchResult<User[]>>(null);
+    const [fetchResult, setFetchResult] = React.useState<FetchResult<Query["GetUsers"]>>(null);
     
     if (fetchResult === null) {
-        Util.fetch(credentials as Credentials, Query.getUsers(), setFetchResult);
+        Util.fetch(credentials, GQLQuery.getUsers(), setFetchResult);
         return <ActivityIndicator animating={true} size={100} style={{marginTop: "50%"}}/>;
     } else if (fetchResult instanceof Error) {
         return <ErrorBanner error={fetchResult} actions={[]}/>
@@ -72,10 +71,10 @@ export function UsersScene() {
 export function FinesScene() {
     const navigation = useNavigation();
     const credentials = React.useContext(AuthCtx).credentials;
-    const [fetchResult, setFetchResult] = React.useState<FetchResult<User>>(null);
+    const [fetchResult, setFetchResult] = React.useState<FetchResult<Query["GetMe"]>>(null);
     
     if (fetchResult === null) {
-        Util.fetch(credentials as Credentials, Query.getFines(), setFetchResult);
+        Util.fetch(credentials, GQLQuery.getFines(), setFetchResult);
         return <ActivityIndicator animating={true} size={100} style={{marginTop: "50%"}}/>;
     } else if (fetchResult instanceof Error) {
         return <ErrorBanner error={fetchResult} actions={[]}/>
@@ -84,14 +83,14 @@ export function FinesScene() {
             <Headline>   Pending</Headline>
             <View>
             {
-                fetchResult.fines.filter(item => item.payment !== null).map((item, i) => {
+                fetchResult.fines.filter(item => item.payment === null).map((item, i) => {
                     return <List.Item
                         key={i}
                         title={item._id}
                         titleStyle={{ fontSize: 20 }}
                         left={props => <Icon {...props} size={70} name="pending-actions" />}
                         onPress={() => {
-                            navigation.navigate("ManageFineScreen", { id: item._id });
+                            navigation.navigate("ManageFine", { id: item._id });
                         }}
                     />
                 })
@@ -100,14 +99,14 @@ export function FinesScene() {
             <Headline>   Completed</Headline>
             <View>
             {
-                fetchResult.fines.filter(item => item.payment === null).map((item, i) => {
+                fetchResult.fines.filter(item => item.payment !== null).map((item, i) => {
                     return <List.Item
                         key={i}
                         title={item._id}
                         titleStyle={{ fontSize: 20 }}
                         left={props => <Icon {...props} size={70} name="task-alt" />}
                         onPress={() => {
-                            navigation.navigate("ManageFineScreen", { id: item._id });
+                            navigation.navigate("ManageFine", { id: item._id });
                         }}
                     />
                 })

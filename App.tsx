@@ -3,16 +3,17 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { PaperProvider } from "react-native-paper";
-import { LoginScreen, HomeScreen, SplashScreen, ManageFineScreen } from "./ui/screen";
-import { AuthContext, Credentials, FetchResult } from "./lib/interface";
+import { LoginScreen, HomeScreen, SplashScreen, ManageFineScreen, PayFineScreen } from "./ui/screen";
+import { AuthContext, FetchResult } from "./lib/interface";
 import { Key } from "./lib/enum";
+import { Mutation } from "./lib/type";
 
 export const AuthCtx = React.createContext<AuthContext>({} as AuthContext);
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-    const [credentials, setCredentials] = React.useState<FetchResult<Credentials>>(null);
-    async function setCredentialsProxy(result: FetchResult<Credentials>) {
+    const [credentials, setCredentials] = React.useState<FetchResult<Mutation["SignIn"]>>(null);
+    async function setCredentialsProxy(result: FetchResult<Mutation["SignIn"]>) {
         if (result && !(result instanceof Error)) {
             console.log("NEW_CREDENTIALS", result);
             await EncryptedStorage.setItem(Key.CREDENTIALS, result);
@@ -36,7 +37,7 @@ export default function App() {
     return (
         <PaperProvider>
             <NavigationContainer>
-                <AuthCtx.Provider value={{ credentials, callback: setCredentialsProxy }}>
+                <AuthCtx.Provider value={{ credentials, setCredentialsProxy }}>
                     <Stack.Navigator screenOptions={{ headerShown: false }}>
                         {
                             (credentials === null) ? (
@@ -58,8 +59,13 @@ export default function App() {
                                     />,
                                     <Stack.Screen
                                         key="1"
-                                        name="ManageFineScreen"
+                                        name="ManageFine"
                                         component={ManageFineScreen}
+                                    />,
+                                    <Stack.Screen
+                                        key="2"
+                                        name="PayFine"
+                                        component={PayFineScreen}
                                     />]
                                 )
                             )
