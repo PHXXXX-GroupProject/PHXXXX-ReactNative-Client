@@ -1,7 +1,7 @@
 import React from "react";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { ScrollView } from "react-native";
-import { ActivityIndicator, List } from "react-native-paper";
+import { ScrollView, View } from "react-native";
+import { ActivityIndicator, Headline, List } from "react-native-paper";
 import { Query } from "../lib/graphql";
 import { AuthCtx } from "../App";
 import { Credentials, FetchResult } from "../lib/interface";
@@ -81,19 +81,38 @@ export function FinesScene() {
         return <ErrorBanner error={fetchResult} actions={[]}/>
     } else {
         return <ScrollView>
+            <Headline>   Pending</Headline>
+            <View>
             {
-                fetchResult.fines.map((item, i) => {
+                fetchResult.fines.filter(item => item.payment !== null).map((item, i) => {
                     return <List.Item
                         key={i}
                         title={item._id}
                         titleStyle={{ fontSize: 20 }}
-                        left={props => <Icon {...props} size={70} name="person" />}
+                        left={props => <Icon {...props} size={70} name="pending-actions" />}
                         onPress={() => {
                             navigation.navigate("ManageFineScreen", { id: item._id });
                         }}
                     />
                 })
             }
+            </View>
+            <Headline>   Completed</Headline>
+            <View>
+            {
+                fetchResult.fines.filter(item => item.payment === null).map((item, i) => {
+                    return <List.Item
+                        key={i}
+                        title={item._id}
+                        titleStyle={{ fontSize: 20 }}
+                        left={props => <Icon {...props} size={70} name="task-alt" />}
+                        onPress={() => {
+                            navigation.navigate("ManageFineScreen", { id: item._id });
+                        }}
+                    />
+                })
+            }
+            </View>
         </ScrollView>
     }
 }

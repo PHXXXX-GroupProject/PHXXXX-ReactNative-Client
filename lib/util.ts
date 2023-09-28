@@ -24,4 +24,15 @@ export class Util {
             callback(err);
         });
     }
+
+    static formatDate(unixTimestamp: number) {
+        const date = new Date(unixTimestamp);
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+
+        return `${year}:${month}:${day} at ${hours}:${minutes}`;
+    }
 }

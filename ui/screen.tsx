@@ -1,7 +1,7 @@
 import React from "react";
 import EncryptedStorage from "react-native-encrypted-storage";
 import { ScrollView, View, Image, DevSettings } from "react-native";
-import { Avatar, BottomNavigation, Button, TextInput, Appbar, ActivityIndicator, Headline, Text } from "react-native-paper";
+import { Avatar, BottomNavigation, Button, TextInput, Appbar, ActivityIndicator, Headline, Text, DataTable, FAB } from "react-native-paper";
 import { LogInScreenStyles, ManageFineStyles } from "./style";
 import { FinesScene } from "./scene";
 import { Credentials, FetchResult, SceneRoute } from "../lib/interface";
@@ -96,7 +96,7 @@ export function HomeScreen() {
     } else {
         const sceneRoutes: SceneRoute[] = [];
         const sceneMap: Record<string, () => React.JSX.Element> = {};
-        
+
         const permissions = fetchResult.role.permissions;
         for (const permission of permissions) {
             const key = permission.module.url;
@@ -150,6 +150,11 @@ export function ManageFineScreen({ route }: any) {
             }
         ]} />
     } else {
+        const data = [
+            { name: 'John Doe', age: 30 },
+            { name: 'Jane Doe', age: 25 },
+        ];
+
         return (
             <View style={{ flex: 1 }}>
                 <Appbar.Header>
@@ -163,14 +168,34 @@ export function ManageFineScreen({ route }: any) {
                 <ScrollView style={ManageFineStyles.view}>
                     <Avatar.Icon
                         style={ManageFineStyles.avatar}
-                        size={150} icon="account-tie"
+                        size={150} icon="clipboard-list"
                     />
-                    <Headline style={ManageFineStyles.heading}>Officer</Headline>
-                    <Text style={ManageFineStyles.input}>{fetchResult.officer.username}</Text>
-                    <Headline style={ManageFineStyles.heading}>Time</Headline>
-                    <Text style={ManageFineStyles.input}>{fetchResult.time}</Text>
-                    <Headline style={ManageFineStyles.heading}>Offenses</Headline>
+                    <Text variant="titleLarge" style={ManageFineStyles.headline}>Officer</Text>
+                    <Text>{fetchResult.officer.username}</Text>
+
+                    <Text variant="titleLarge" style={ManageFineStyles.headline}>Time</Text>
+                    <Text>{Util.formatDate(fetchResult.time)}</Text>
+
+                    <Text variant="titleLarge" style={ManageFineStyles.headline}>Offenses</Text>
+                    <DataTable>
+                        <DataTable.Header>
+                            <DataTable.Title>Type</DataTable.Title>
+                            <DataTable.Title numeric>Amount</DataTable.Title>
+                        </DataTable.Header>
+                        {fetchResult.offenses.map(offense => (
+                            <DataTable.Row key={offense._id}>
+                                <DataTable.Cell>{offense.name}</DataTable.Cell>
+                                <DataTable.Cell numeric>{offense.amount}</DataTable.Cell>
+                            </DataTable.Row>
+                        ))}
+                    </DataTable>
                 </ScrollView>
+                <FAB
+                    icon="currency-usd"
+                    label="Pay"
+                    style={ManageFineStyles.fab}
+                    onPress={() => console.log('Pressed')}
+                />
             </View>
         );
     }

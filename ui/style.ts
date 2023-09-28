@@ -26,13 +26,16 @@ export const ManageFineStyles = StyleSheet.create({
     avatar: {
         alignSelf: "center"
     },
-    input: {
-        marginVertical: 20,
-    },
-    heading: {
-        marginVertical: 20
+    headline: {
+        marginTop: 20
     },
     button: {
         margin: 20
+    },
+    fab: {
+        position: 'absolute',
+        margin: 16,
+        right: 20,
+        bottom: 20,
     }
 });
