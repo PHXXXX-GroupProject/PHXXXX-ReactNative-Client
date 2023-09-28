@@ -37,7 +37,7 @@ export default function App() {
     return (
         <PaperProvider>
             <NavigationContainer>
-                <AuthCtx.Provider value={{ credentials, setCredentialsProxy }}>
+                <AuthCtx.Provider value={{ credentials: credentials as string, setCredentialsProxy }}>
                     <Stack.Navigator screenOptions={{ headerShown: false }}>
                         {
                             (credentials === null) ? (

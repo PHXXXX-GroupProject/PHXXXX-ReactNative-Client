@@ -1,7 +1,7 @@
 import React from "react";
 import EncryptedStorage from "react-native-encrypted-storage";
 import { ScrollView, View, Image, DevSettings } from "react-native";
-import { Avatar, BottomNavigation, Button, TextInput, Appbar, ActivityIndicator, Headline, Text, DataTable, FAB } from "react-native-paper";
+import { Avatar, BottomNavigation, Button, TextInput, Appbar, ActivityIndicator, Text, DataTable, FAB } from "react-native-paper";
 import { LogInScreenStyles, ManageFineStyles } from "./style";
 import { FinesScene } from "./scene";
 import { FetchResult, SceneRoute } from "../lib/interface";
@@ -16,7 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 export function SplashScreen() {
     return (
         <Image
-            source={require("./img/splash.jpg")}
+            source={require("./img/splash.png")}
             style={{
                 width: "100%",
                 height: "100%"
@@ -32,9 +32,9 @@ export function LoginScreen() {
 
     return (
         <View style={LogInScreenStyles.view}>
-            <Avatar.Icon
+            <Avatar.Image
                 style={LogInScreenStyles.avatar}
-                size={150} icon="folder" />
+                size={150} source={require('./img/logo.png')} />
             <TextInput
                 style={LogInScreenStyles.textInput}
                 mode="outlined"
@@ -54,7 +54,7 @@ export function LoginScreen() {
                 style={LogInScreenStyles.button}
                 mode="outlined"
                 onPress={() => {
-                    Util.fetch({ jwtToken: "" }, Mutation.signIn(username, password), setCredentialsProxy);
+                    Util.fetch("", GQLMutation.signIn(username, password), setCredentialsProxy);
                 }}
             >
                 Sign In
@@ -63,7 +63,7 @@ export function LoginScreen() {
                 style={LogInScreenStyles.button}
                 mode="outlined"
                 onPress={() => {
-                    Util.fetch({ jwtToken: "" }, Mutation.signIn(username, password), setCredentialsProxy);
+                    Util.fetch("", GQLMutation.signIn(username, password), setCredentialsProxy);
                 }}
             >
                 Sign Up
